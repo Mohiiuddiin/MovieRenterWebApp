@@ -10,7 +10,7 @@ namespace MovieRenterWebApp.Models
     {
         public int Id { get; set; }
         [Required]
-        [StringLength(25)]
+        [StringLength(maximumLength:25)]
         public string Name { get; set; }
         [Display(Name="Date of Birth")]
         public DateTime? BirthDate { get; set; }
@@ -18,6 +18,8 @@ namespace MovieRenterWebApp.Models
        
         public MembershipType MembershipType { get; set; }
         [Display(Name = "Membership Type")]
+        
+        [Is18yearsOld]
         public int MembershipTypeId { get; set; }
 
     }

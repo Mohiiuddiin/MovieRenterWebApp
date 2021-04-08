@@ -29,21 +29,33 @@ namespace MovieRenterWebApp.Controllers
             return View(Customers);
         }
 
-        public ActionResult Create()
+        [HttpGet]
+        public ActionResult Save()
         {
             var memberShipType = dbContext.MembershipTypes.ToList();
             var viewModel = new NewCustomerViewModel()
             {
+                Customer = new Customer(),
                 MembershipTypes = memberShipType
             };
             return View(viewModel);
-        }   
-        
+        }
+
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult Save(Customer customer)
         {
-            
-            if(customer.Id == 0)
+            if (!ModelState.IsValid)
+            {
+                var viewModel = new NewCustomerViewModel()
+                {
+                    Customer = customer,
+                    MembershipTypes = dbContext.MembershipTypes.ToList()
+                };
+                return View("Save", viewModel);
+            }
+
+            if (customer.Id == 0)
             {
                 dbContext.Customers.Add(customer);
             }
@@ -56,25 +68,31 @@ namespace MovieRenterWebApp.Controllers
                 updateCustomer.IsSubscribedToNewsLetter = customer.IsSubscribedToNewsLetter;
 
             }
-            
+
             dbContext.SaveChanges();
-            return RedirectToAction("Index","Customer");
+            return RedirectToAction("Index", "Customer");
+
+
+
+
+
+
         }
 
         public ActionResult Edit(int Id)
         {
             var viewModel = new NewCustomerViewModel()
             {
-                Customer = dbContext.Customers.SingleOrDefault(c=>c.Id==Id),
+                Customer = dbContext.Customers.SingleOrDefault(c => c.Id == Id),
                 MembershipTypes = dbContext.MembershipTypes.ToList()
             };
-            return View("Save",viewModel);
+            return View("Save", viewModel);
         }
 
         public ActionResult Details(int Id)
-        {        
-            
-            return View(dbContext.Customers.Include(c=>c.MembershipType).FirstOrDefault(x => x.Id == Id));
+        {
+
+            return View(dbContext.Customers.Include(c => c.MembershipType).FirstOrDefault(x => x.Id == Id));
         }
 
         //public List<Customer> GetCustomers()

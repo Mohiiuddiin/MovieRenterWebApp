@@ -41,11 +41,25 @@ namespace MovieRenterWebApp.Controllers
             return View(viewModel);
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult Save(Movie movie)
         {
-            dbContext.Movies.Add(movie);
-            dbContext.SaveChanges();
-            return RedirectToAction("Index","Movies");
+            if (ModelState.IsValid)
+            {
+                dbContext.Movies.Add(movie);
+                dbContext.SaveChanges();
+                return RedirectToAction("Index", "Movies");
+            }
+            else
+            {
+                MoviesView moviesView = new MoviesView()
+                {
+                    Movie = movie,
+                    Genres = dbContext.Genres.ToList()
+                };
+                return View(moviesView);
+            }
+            
         }
 
         public ActionResult Edit(int Id)
@@ -60,16 +74,30 @@ namespace MovieRenterWebApp.Controllers
         [HttpPost]
         public ActionResult Edit(Movie movie)
         {
-            var updateMovie = dbContext.Movies.FirstOrDefault(x => x.Id == movie.Id);
+            if (ModelState.IsValid)
+            {
+                var updateMovie = dbContext.Movies.FirstOrDefault(x => x.Id == movie.Id);
 
-            updateMovie.Name = movie.Name;
-            updateMovie.ReleaseDate = movie.ReleaseDate;
-            updateMovie.DateAdded = movie.DateAdded;
-            updateMovie.GenreId = movie.GenreId;
-            updateMovie.NumberInStock = movie.NumberInStock;
+                updateMovie.Name = movie.Name;
+                updateMovie.ReleaseDate = movie.ReleaseDate;
+                updateMovie.DateAdded = movie.DateAdded;
+                updateMovie.GenreId = movie.GenreId;
+                updateMovie.NumberInStock = movie.NumberInStock;
 
-            dbContext.SaveChanges();
-            return RedirectToAction("Index","Movies");
+                dbContext.SaveChanges();
+                return RedirectToAction("Index", "Movies");
+            }
+            else
+            {
+                var viewModel = new MoviesView()
+                {
+                    Movie = movie,
+                    Genres = dbContext.Genres.ToList()
+                    
+                };
+                return View(viewModel);
+                
+            }
         }
         
         public ActionResult Details(int Id)
@@ -91,7 +119,7 @@ namespace MovieRenterWebApp.Controllers
             }
             dbContext.Movies.Remove(movie);
             dbContext.SaveChanges();
-            return RedirectToAction("Index","Movies");
+            return RedirectToAction("Index", "Movies");
         }
 
         // GET: Movies
