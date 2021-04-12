@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Web.Http;
+using MovieRenterWebApp.DTOs;
 using MovieRenterWebApp.Models;
 
 namespace MovieRenterWebApp.Controllers.Api
@@ -16,40 +17,44 @@ namespace MovieRenterWebApp.Controllers.Api
         }
 
 
-        public IEnumerable<Customer> GetCustomers()
+        public IEnumerable<CustomerDto> GetCustomers()
         {
-            var customers = dbContext.Customers.ToList();
+            var customers = dbContext.Customers.ToList().Select(AutoMapper.Mapper.Map<Customer,CustomerDto>);
 
             return customers;
         }
-       
-        public Customer GetCustomer(int Id)
+
+        public CustomerDto GetCustomer(int Id)
         {
             var customer = dbContext.Customers.SingleOrDefault(x => x.Id == Id);
 
             if (customer == null)
                 throw new HttpResponseException(HttpStatusCode.NotFound);
 
-            return customer;
+            return AutoMapper.Mapper.Map<Customer,CustomerDto>(customer);
         }
 
         [HttpPost]
-        public Customer CreateCustomer(Customer customer)
+        public CustomerDto CreateCustomer(CustomerDto customerDto)
         {
             if (ModelState.IsValid)
             {
+                var customer = AutoMapper.Mapper.Map<CustomerDto,Customer>(customerDto);
                 dbContext.Customers.Add(customer);
                 dbContext.SaveChanges();
+
+                customerDto.Id = customer.Id;
             }
             else
             {
                 throw new HttpResponseException(HttpStatusCode.BadRequest);
             }
-            return customer;
+            
+            return customerDto;
         }
 
         [HttpPut]
-        public void UpdateCustomer(int Id,Customer customer)
+        public void UpdateCustomer(int Id, CustomerDto customerDto)
         {
             if (!ModelState.IsValid)
             {
@@ -59,12 +64,15 @@ namespace MovieRenterWebApp.Controllers.Api
             {
                 var UpdateCustomer = dbContext.Customers.SingleOrDefault(x => x.Id == Id);
 
-                if(UpdateCustomer != null)
+                if (UpdateCustomer != null)
                 {
-                    UpdateCustomer.Name = customer.Name;
-                    UpdateCustomer.BirthDate = customer.BirthDate;
-                    UpdateCustomer.MembershipTypeId = customer.MembershipTypeId;
-                    UpdateCustomer.IsSubscribedToNewsLetter = customer.IsSubscribedToNewsLetter;
+
+                    AutoMapper.Mapper.Map(customerDto,UpdateCustomer);
+
+                    //UpdateCustomer.Name = customerDto.Name;
+                    //UpdateCustomer.BirthDate = customerDto.BirthDate;
+                    //UpdateCustomer.MembershipTypeId = customerDto.MembershipTypeId;
+                    //UpdateCustomer.IsSubscribedToNewsLetter = customerDto.IsSubscribedToNewsLetter;
 
                     dbContext.SaveChanges();
                 }
@@ -80,13 +88,14 @@ namespace MovieRenterWebApp.Controllers.Api
         {
             var deleteCustomer = dbContext.Customers.SingleOrDefault(x => x.Id == Id);
 
-            if(deleteCustomer != null){
+            if (deleteCustomer != null)
+            {
                 dbContext.Customers.Remove(deleteCustomer);
                 dbContext.SaveChanges();
             }
             else
             {
-                throw new HttpResponseException(HttpStatusCode.NotFound); 
+                throw new HttpResponseException(HttpStatusCode.NotFound);
             }
         }
     }
