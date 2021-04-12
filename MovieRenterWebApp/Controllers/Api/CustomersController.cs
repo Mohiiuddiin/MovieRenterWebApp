@@ -1,4 +1,4 @@
-﻿
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -35,7 +35,7 @@ namespace MovieRenterWebApp.Controllers.Api
         }
 
         [HttpPost]
-        public CustomerDto CreateCustomer(CustomerDto customerDto)
+        public IHttpActionResult CreateCustomer(CustomerDto customerDto)
         {
             if (ModelState.IsValid)
             {
@@ -44,13 +44,15 @@ namespace MovieRenterWebApp.Controllers.Api
                 dbContext.SaveChanges();
 
                 customerDto.Id = customer.Id;
+                return Created(new Uri(Request.RequestUri + "/" + customer.Id), customerDto);
             }
             else
             {
-                throw new HttpResponseException(HttpStatusCode.BadRequest);
+                //throw new HttpResponseException(HttpStatusCode.BadRequest);
+                return BadRequest();
             }
             
-            return customerDto;
+            
         }
 
         [HttpPut]

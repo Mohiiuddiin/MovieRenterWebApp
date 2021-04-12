@@ -17,7 +17,7 @@ namespace MovieRenterWebApp.DTOs
         public DateTime? BirthDate { get; set; }
         public bool IsSubscribedToNewsLetter { get; set; }
 
-        [Is18yearsOld]
+        //[Is18yearsOld]
         public int MembershipTypeId { get; set; }
     }
 }
